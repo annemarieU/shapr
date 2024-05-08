@@ -227,15 +227,15 @@ feature_combinations <- function(m, exact = TRUE, n_combinations = 200, weight_z
     )
   }
 
-  # Not supported for m > 30
-  if (m > 30 && m_group == 0) {
-    stop(
-      paste0(
-        "Currently we are not supporting cases where the number of features is greater than 30\n",
-        "for feature-wise Shapley values.\n"
-      )
-    )
-  }
+  # # Not supported for m > 30
+  # if (m > 30 && m_group == 0) {
+  #   stop(
+  #     paste0(
+  #       "Currently we are not supporting cases where the number of features is greater than 30\n",
+  #       "for feature-wise Shapley values.\n"
+  #     )
+  #   )
+  # }
   if (m_group > 30) {
     stop(
       paste0(
@@ -322,9 +322,39 @@ feature_not_exact <- function(m, n_combinations = 200, weight_zero_m = 10^6, uni
   # Find weights for given number of features ----------
   n_features <- seq(m - 1)
   n <- sapply(n_features, choose, n = m)
-  w <- shapley_weights(m = m, N = n, n_features) * n
+  if (any(is.na(n))) {
+    message(
+      "n was na, will be replaced with 0.00001"
+    )
+  }
+  n <- replace(n, is.na(n), 10^6) # If this Number is huge, it will make the weights huge, which means that the probability for it beeing choosen will be very low. 
+  # I hope this it how they wanted it.
+  w <- shapley_weights(m = m, N = n, n_features)
+  
+  if (any(is.na(w))){
+    nan_values <- sum(is.na(w))
+    
+    message(
+      "Shapley weights was NA and was not catched, Number of NA values: ", nan_values
+    )
+  }
+  w <- replace(w, is.na(w), 10^6)
+  w <- w * n
+  w <- replace(w, is.na(w), 10^6)
   p <- w / sum(w)
 
+
+  # ANNEMARIE #TODO # Irgend was ist NAN kp was aber irgendwas ist NA. 
+  if (any(is.na(p))){
+    p_without_nan <- replace(p, is.na(p), 0)
+    p <- p_without_nan
+    message(
+          "P was NAN, will be replaced with 0"
+         
+        )
+        
+
+  }
   feature_sample_all <- list()
   unique_samples <- 0
 
