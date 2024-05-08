@@ -10,11 +10,8 @@
 compute_vS <- function(internal, model, predict_model, method = "future") {
   S_batch <- internal$objects$S_batch
 
-  if (method == "future") {
-    ret <- future_compute_vS_batch(S_batch = S_batch, internal = internal, model = model, predict_model = predict_model)
-  } else {
-    # Doing the same as above without future without progressbar or paralellization
-    ret <- list()
+# Annemarie # Testen ob Parallelcomputing weg ist
+ ret <- list()
     for (i in seq_along(S_batch)) {
       S <- S_batch[[i]]
       ret[[i]] <- batch_compute_vS(
@@ -23,8 +20,24 @@ compute_vS <- function(internal, model, predict_model, method = "future") {
         model = model,
         predict_model = predict_model
       )
-    }
-  }
+      }
+  # Normale version
+
+  # if (method == "future") {
+  #   ret <- future_compute_vS_batch(S_batch = S_batch, internal = internal, model = model, predict_model = predict_model)
+  # } else {
+  #   # Doing the same as above without future without progressbar or paralellization
+  #   ret <- list()
+  #   for (i in seq_along(S_batch)) {
+  #     S <- S_batch[[i]]
+  #     ret[[i]] <- batch_compute_vS(
+  #       S = S,
+  #       internal = internal,
+  #       model = model,
+  #       predict_model = predict_model
+  #     )
+  #   }
+  # }
 
   return(ret)
 }
