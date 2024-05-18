@@ -131,7 +131,7 @@ shapley_setup <- function(internal) {
   is_groupwise <- internal$parameters$is_groupwise
 
   group_num <- internal$objects$group_num
-
+  gc()
   X <- feature_combinations(
     m = n_features0,
     exact = exact,
@@ -139,20 +139,20 @@ shapley_setup <- function(internal) {
     weight_zero_m = 10^6,
     group_num = group_num
   )
-
+  gc()
   # Get weighted matrix ----------------
   W <- weight_matrix(
     X = X,
     normalize_W_weights = TRUE,
     is_groupwise = is_groupwise
   )
-
+  gc()
   ## Get feature matrix ---------
   S <- feature_matrix_cpp(
     features = X[["features"]],
     m = n_features0
   )
-
+  gc()
   #### Updating parameters ####
 
   # Updating parameters$exact as done in feature_combinations
@@ -165,12 +165,12 @@ shapley_setup <- function(internal) {
   # This will be obsolete later
   internal$parameters$group_num <- NULL # TODO: Checking whether I could just do this processing where needed
   # instead of storing it
-
+  gc()
   internal$objects$X <- X
   internal$objects$W <- W
   internal$objects$S <- S
   internal$objects$S_batch <- create_S_batch_new(internal)
-
+  gc()
 
   return(internal)
 }
@@ -634,7 +634,7 @@ weight_matrix <- function(X, normalize_W_weights = TRUE, is_groupwise = FALSE) {
       w = w
     )
   }
-
+  gc()
   return(W)
 }
 
@@ -679,7 +679,7 @@ create_S_batch_new <- function(internal, seed = NULL) {
         ]
       }
     }
-
+    gc()
     batch_count_dt[, n_leftover_first_batch := n_S_per_approach %% n_batches_per_approach]
     data.table::setorder(batch_count_dt, -n_leftover_first_batch)
 
@@ -696,6 +696,7 @@ create_S_batch_new <- function(internal, seed = NULL) {
     for (i in seq_along(approach_vec)) {
       X[approach == approach_vec[i], batch := ceiling(.I / .N * n_batch_vec[i]) + batch_counter]
       batch_counter <- X[approach == approach_vec[i], max(batch)]
+      gc()
     }
   } else {
     X[!(n_features %in% c(0, n_features0)), approach := approach0]
@@ -705,6 +706,7 @@ create_S_batch_new <- function(internal, seed = NULL) {
     data.table::setorder(X, randomorder)
     data.table::setorder(X, shapley_weight)
     X[!(n_features %in% c(0, n_features0)), batch := ceiling(.I / .N * n_batches)]
+    gc()
   }
 
   # Assigning batch 1 (which always is the smallest) to the full prediction.
@@ -714,6 +716,6 @@ create_S_batch_new <- function(internal, seed = NULL) {
 
   # Create a list of the batch splits
   S_groups <- split(X[id_combination != 1, id_combination], X[id_combination != 1, batch])
-
+  gc()
   return(S_groups)
 }
