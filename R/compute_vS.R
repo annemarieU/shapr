@@ -19,6 +19,7 @@ compute_vS <- function(internal, model, predict_model, method = "future") {
         internal = internal,
         model = model,
         predict_model = predict_model
+        gc()
       )
       }
   # Normale version
@@ -71,6 +72,7 @@ batch_compute_vS <- function(S, internal, model, predict_model, p = NULL) {
   } else {
     # Here dt_vS is either only dt_vS or a list containing dt_vS and dt if internal$parameters$keep_samp_for_vS = TRUE
     dt_vS <- batch_prepare_vS_MC(S = S, internal = internal, model = model, predict_model = predict_model)
+    gc()
   }
 
   # Update the progress bar if provided
@@ -121,9 +123,9 @@ batch_prepare_vS_MC <- function(S, internal, model, predict_model) {
   keep_samp_for_vS <- internal$parameters$keep_samp_for_vS
 
   dt <- batch_prepare_vS_MC_auxiliary(S = S, internal = internal) # Make it optional to store and return the dt_list
-
+  gc()
   pred_cols <- paste0("p_hat", seq_len(output_size))
-
+  
   compute_preds(
     dt, # Updating dt by reference
     feature_names = feature_names,
@@ -138,7 +140,9 @@ batch_prepare_vS_MC <- function(S, internal, model, predict_model) {
     y = y,
     xreg = xreg
   )
+  gc()
   dt_vS <- compute_MCint(dt, pred_cols)
+  gc()
 
   # Also return the dt object if keep_samp_for_vS is TRUE
   return(if (keep_samp_for_vS) list(dt_vS = dt_vS, dt_samp_for_vS = dt) else dt_vS)
@@ -207,10 +211,14 @@ compute_preds <- function(
 compute_MCint <- function(dt, pred_cols = "p_hat") {
   # Calculate contributions
   dt_res <- dt[, lapply(.SD, function(x) sum(((x) * w) / sum(w))), .(id, id_combination), .SDcols = pred_cols]
+  gc()
   data.table::setkeyv(dt_res, c("id", "id_combination"))
+  gc()                      
   dt_mat <- data.table::dcast(dt_res, id_combination ~ id, value.var = pred_cols)
+  gc()
   if (length(pred_cols) == 1) {
     names(dt_mat)[-1] <- paste0(pred_cols, "_", names(dt_mat)[-1])
+    gc()
   }
   # dt_mat[, id_combination := NULL]
 
