@@ -301,9 +301,31 @@ sample_coalition_table <- function(m,
                                    dt_valid_causal_coalitions = NULL) {
   # Setup
   coal_samp_vec <- seq(m - 1)
-  n <- choose(m, coal_samp_vec)
-  w <- shapley_weights(m = m, N = n, coal_samp_vec) * n
+    if (any(is.na(n))) {
+    message(
+      "n was na, will be replaced with 0.00001"
+    )
+  }
+  n <- replace(n, is.na(n), 10^6)
+  w <- shapley_weights(m = m, N = n, coal_samp_vec)
+  
+  w <- replace(w, is.na(w), 10^6)
+  w <- w * n
+  w <- replace(w, is.na(w), 10^6)
   p <- w / sum(w)
+
+
+  # ANNEMARIE #TODO # Irgend was ist NAN kp was aber irgendwas ist NA. 
+  if (any(is.na(p))){
+    p_without_nan <- replace(p, is.na(p), 0)
+    p <- p_without_nan
+    message(
+          "P was NAN, will be replaced with 0"
+         
+        )
+        
+
+  }
 
   if (!is.null(prev_coal_samples)) {
     coal_sample_all <- prev_coal_samples
