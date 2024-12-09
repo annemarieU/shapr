@@ -364,7 +364,7 @@ sample_coalition_table <- function(m,
   # Add zero and full prediction
   coal_sample_all <- c(list(integer(0)), coal_sample_all, list(c(1:m)))
   X <- data.table(coalition_size = sapply(coal_sample_all, length))
-  X[, coalition_size := as.integer(coalition_size)]
+  X[, coalition_size := as.double(coalition_size)]
 
   # Get number of occurences and duplicated rows-------
   is_duplicate <- NULL # due to NSE notes in R CMD check
@@ -422,7 +422,7 @@ sample_coalition_table <- function(m,
   # Set column order and key table
   data.table::setkeyv(X, "coalition_size")
   X[, id_coalition := .I]
-  X[, N := as.integer(N)]
+  X[, N := as.double(N)]
   nms <- c("id_coalition", "coalitions", "coalition_size", "N", "shapley_weight", "p", "sample_freq")
   data.table::setcolorder(X, nms)
 
