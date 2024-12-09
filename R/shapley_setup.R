@@ -448,9 +448,9 @@ sample_coalition_table <- function(m,
 #' @author Nikolai Sellereite
 shapley_weights <- function(m, N, n_components, weight_zero_m = 10^6) {
   # Annemarie hoffentlich löst es das problem
-  m <- as.numeric(m)
-  N <- as.numeric(N)
-  n_components <-as.numeric(n_components)
+  m <- as.double(m)
+  N <- as.double(N)
+  n_components <-as.double(n_components)
   x <- (m - 1) / (N * n_components * (m - n_components))
   x[!is.finite(x)] <- weight_zero_m
   x
