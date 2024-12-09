@@ -471,7 +471,7 @@ helper_feature <- function(m, coal_sample) {
   dt <- data.table::data.table(x)
   cnms <- paste0("V", seq(m))
   data.table::setnames(dt, cnms)
-  dt[, sample_frequence := as.integer(.N), by = cnms]
+  dt[, sample_frequence := as.double(.N), by = cnms]
   dt[, is_duplicate := duplicated(dt)]
   dt[, (cnms) := NULL]
 
