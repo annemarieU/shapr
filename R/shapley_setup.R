@@ -231,12 +231,15 @@ kernelSHAP_reweighting <- function(X, reweight = "on_N") {
     X[-c(1, .N), shapley_weight := mean(shapley_weight), by = coalition_size]
   } else if (reweight == "on_all") {
     m <- X[.N, coalition_size]
-    X[-c(1, .N), shapley_weight := shapley_weights(
+    shapley_w <-shapley_weights(
       m = m,
       N = N,
       n_components = coalition_size,
       weight_zero_m = 10^6
-    ) / sum_shapley_weights(m)]
+    ) 
+    shapley_w <- replace(shapley_w, is.na(shapley_w), 10^6)
+   
+    X[-c(1, .N), shapley_weight := shapley_w / sum_shapley_weights(m)]
   } else if (reweight == "on_N_sum") {
     X[-c(1, .N), shapley_weight := sum(shapley_weight), by = N]
   } else if (reweight == "on_all_cond") {
@@ -460,7 +463,18 @@ shapley_weights <- function(m, N, n_components, weight_zero_m = 10^6) {
 sum_shapley_weights <- function(m) {
   coal_samp_vec <- seq(m - 1)
   n <- sapply(coal_samp_vec, choose, n = m)
-  w <- shapley_weights(m = m, N = n, coal_samp_vec) * n
+  if (any(is.na(n))) {
+    message(
+      "n was na, will be replaced with 0.00001"
+    )
+  }
+  n <- replace(n, is.na(n), 10^6)
+
+  
+  w <- shapley_weights(m = m, N = n, coal_samp_vec)
+  w <- replace(w, is.na(w), 10^6)
+  w <- w*n
+  w <- replace(w, is.na(w), 10^6)
   return(sum(w))
 }
 
