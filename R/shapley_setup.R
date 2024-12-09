@@ -301,6 +301,7 @@ sample_coalition_table <- function(m,
                                    dt_valid_causal_coalitions = NULL) {
   # Setup
   coal_samp_vec <- seq(m - 1)
+  n <- choose(m, coal_samp_vec)
     if (any(is.na(n))) {
     message(
       "n was na, will be replaced with 0.00001"
